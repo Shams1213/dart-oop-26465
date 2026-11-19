@@ -1,10 +1,16 @@
-# Dart OOP Assignment - Kigali Bus Card
+# Dart OOP Assignment: Kigali Bus Card
 
-- **Name:** Shams Alola Mohammed
-- **Student ID:** 26465
-- **My numbers:** D = 65, L = 5, Starting balance = 1650 RWF, Bus fare = 265 RWF, Student discount = 15%
+**Name:** Shams Alola Mohammed  
+**Student ID:** 26465  
 
-## Output of main.dart
+## My Numbers
+- **D:** 65
+- **L:** 5
+- **Starting balance:** 1000 + (65 × 10) = 1650 RWF
+- **Bus fare:** 200 + 65 = 265 RWF
+- **Student discount:** 10 + 5 = 15%
+
+## Output of `main.dart`
 ```text
 Error: name too short
 Owner: Shams Alola Mohammed | Balance: 1650 RWF
@@ -20,35 +26,40 @@ Owner: Shams Alola Mohammed | Balance: 1424 RWF
 Student card: 15% off
 ```
 
-## Questions
-- **Why does `BusCard` have a `balance` getter and NO `balance` setter?**
-  `BusCard` has no `balance` setter so nobody outside the class can change `_balance` directly to any random number. The balance can only change through `topUp()` and `pay()`, which check the rules first.
+## Part 1: Why no setter for `balance`?
+A `BusCard` keeps `_balance` private so external code cannot overwrite it freely. If a public setter existed, any part of the program could assign a negative amount or add free money without validation. By allowing changes only through `topUp()` and `pay()`, the class enforces its rules—accepting only top-ups between 500 and 50,000 RWF and blocking rides when the balance is too low.
 
-- **What does `~/` do in Dart? Show what `237 * 17` gives with `/` and with `~/`.**
-  `~/` is integer division in Dart. It divides two numbers and drops the decimal part to return a whole `int`.
-  For `237 * 17` (`4029`) divided by `100`:
-  - `237 * 17 / 100` gives `40.29` (a `double`)
-  - `237 * 17 ~/ 100` gives `40` (an `int`)
+## Part 2: What does `~/` do?
+In Dart, normal division (`/`) returns a decimal (`double`), whereas truncating division (`~/`) divides two numbers and discards everything after the decimal point to produce a whole `int`.
 
-## Part 4 - Bugs Found in `bug_hunt.dart`
+- `print(237 * 17 / 100);` prints `40.29`
+- `print(237 * 17 ~/ 100);` prints `40`
 
-| # | Line | What was wrong | How I fixed it |
-|---|------|----------------|----------------|
-| 1 | `super(brand, battery);` inside `{ }` | `super(...)` was called inside the constructor body instead of the initializer list | Moved `: super(brand, battery)` to the constructor header before `{` |
-| 2 | `super.status;` | Missing parentheses `()`, so the parent method was never actually called | Changed it to `super.status();` |
-| 3 | `void charge(String amount)` | Parameter type was `String`, which does not match `Device.charge(int amount)` | Changed parameter type to `int` (`void charge(int amount)`) |
-| 4 | `p.battery = 120;` | `Device` had no `battery` setter, and battery values should only be `0` to `100` | Added `set battery(int value)` to accept only `0` to `100` and reject invalid values |
-| 5 | `_battery = _battery + amount;` | `charge()` allowed `_battery` to go above `100%` | Added a check in `charge()` to cap `_battery` at `100` |
+Inside `StudentCard.pay()`, using `fare * _discount ~/ 100` ensures the discount is calculated as an exact whole number of Rwandan Francs (`39` RWF instead of `39.75`).
 
-- **Line that looks wrong but is actually valid Dart:**
-  `String get brand => _brand;` is valid Dart syntax. It is a short one-line arrow getter that returns `_brand`.
+## Part 4: Bug Table (`bug_hunt.dart`)
 
-## Part 5 - Read Before Running
-- **My prediction (written before running):**
-  I predict it will print `Hello from B`. Even though `x` has type `A`, the actual object created in memory is `B()`, so when `intro()` calls `greet()`, Dart runs `B`'s overridden `greet()` method.
+| Bug | The line | Why it is wrong | My fix |
+|-----|----------|-----------------|--------|
+| 1 | `super(brand, battery);` inside `{ }` | In Dart, a superclass constructor must be called in the initializer list after `:`, not inside the constructor body. | Moved `: super(brand, battery)` to the constructor signature before `{`. |
+| 2 | `super.status;` | Without parentheses `()`, this only references the method instead of executing it, so the parent status never prints. | Changed it to `super.status();`. |
+| 3 | `void charge(String amount)` | The parameter type `String` does not match `Device.charge(int amount)`, causing an override signature error. | Changed the parameter type to `int` (`void charge(int amount)`). |
+| 4 | `p.battery = 120;` | `Device` defined a `battery` getter without a setter, and a battery percentage cannot exceed 100. | Added `set battery(int value)` that allows only `0` to `100` and rejects invalid values. |
+| 5 | `_battery = _battery + amount;` | Calling `charge()` could push `_battery` past 100%. | Added a check in `charge()` so `_battery` stops at `100`. |
+| Not a bug | `String get brand => _brand;` | Looks different from `{ return _brand; }`, but arrow syntax is valid Dart shorthand for a single-expression getter. | Left as valid (written with `{ return _brand; }` in my code). |
 
-- **Actual output:**
-  *(To be added after running)*
+## Part 5: Prediction & Result
 
-- **Was I right?**
-  *(To be added after running)*
+**My prediction:**
+```text
+Hello from B
+```
+**Why:** Although the variable `x` is declared with the parent type `A`, the actual object created in memory is an instance of `B`. When `x.intro()` runs and calls `greet()`, Dart uses runtime polymorphism to run `B`'s overridden `greet()` method rather than `A`'s.
+
+**Real output:**
+```text
+Hello from B
+```
+
+**Was I right?**  
+Yes, my prediction matched the real output.
